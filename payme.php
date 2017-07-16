@@ -168,6 +168,17 @@ FORM;
             }
 
             // Authorize client
+			if (!function_exists('getallheaders')) {
+      function getallheaders(){
+			$headers = '';
+			foreach ($_SERVER as $name => $value){
+				if (substr($name, 0, 5) == 'HTTP_'){
+					$headers[str_replace(' ', '-', ucwords(strtolower(str_replace('_', ' ', substr($name, 5)))))] = $value;
+				}
+			}
+        return $headers;
+		}
+        }
             $headers = getallheaders();
             $encoded_credentials = base64_encode("Paycom:{$this->merchant_key}");
             if (!$headers || // there is no headers
@@ -322,6 +333,7 @@ FORM;
             } else {
                 $create_time = $this->current_timestamp();
                 $transaction_id = $payload['params']['id'];
+				$order->reduce_order_stock();
                 $saved_transaction_id = $this->get_transaction_id($order);
 
                 if ($order->status == "pending") { // handle new transaction
